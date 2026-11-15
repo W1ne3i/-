@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -43,6 +43,29 @@ def get_transactions(db: Session = Depends(get_db)):
     transactions = db.query(models.Transaction).all()
 
     return transactions
+
+@app.delete("/api/transactions/{transaction_id}")
+def delete_transaction(
+    transaction_id: int,
+    db: Session = Depends(get_db)
+):
+    transaction = db.query(models.Transaction).filter(
+        models.Transaction.id == transaction_id
+    ).first()
+
+    if transaction is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Финансовая операция не найдена"
+        )
+
+    db.delete(transaction)
+    db.commit()
+
+    return {
+        "message": "Финансовая операция успешно удалена",
+        "deleted_id": transaction_id
+    }
 
 @app.get("/api/summary")
 def get_summary(db: Session = Depends(get_db)):
