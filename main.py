@@ -44,6 +44,35 @@ def get_transactions(db: Session = Depends(get_db)):
 
     return transactions
 
+@app.patch(
+    "/api/transactions/{transaction_id}",
+    response_model=schemas.TransactionResponse
+)
+def update_transaction(
+    transaction_id: int,
+    transaction_update: schemas.TransactionUpdate,
+    db: Session = Depends(get_db)
+):
+    transaction = db.query(models.Transaction).filter(
+        models.Transaction.id == transaction_id
+    ).first()
+
+    if transaction is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Финансовая операция не найдена"
+        )
+
+    update_data = transaction_update.model_dump(exclude_unset=True)
+
+    for field, value in update_data.items():
+        setattr(transaction, field, value)
+
+    db.commit()
+    db.refresh(transaction)
+
+    return transaction
+
 @app.delete("/api/transactions/{transaction_id}")
 def delete_transaction(
     transaction_id: int,

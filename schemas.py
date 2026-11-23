@@ -21,3 +21,9 @@ class TransactionResponse(BaseModel):
     comment: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
+class TransactionUpdate(BaseModel):
+    type: Literal["income", "expense"] | None = None
+    amount: float | None = Field(default=None, gt=0)
+    category: str | None = None
+    comment: str | None = None
