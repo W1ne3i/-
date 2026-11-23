@@ -96,7 +96,7 @@ def delete_transaction(
         "deleted_id": transaction_id
     }
 
-@app.get("/api/summary")
+@app.get("/api/summary", response_model=schemas.SummaryResponse)
 def get_summary(db: Session = Depends(get_db)):
     income = db.query(func.sum(models.Transaction.amount)).filter(
         models.Transaction.type == "income"
